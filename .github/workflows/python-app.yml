@@ -1,7 +1,8 @@
+这个工作流程需要怎么写requirement.txt
 name: Python application
 
 on:
-  push:
+  push: 
     branches: [ main ]
   pull_request:
     branches: [ main ]
@@ -24,16 +25,13 @@ jobs:
         pip install -r requirements.txt
     - name: Run tests and generate coverage report
       run: |
-        coverage run -m unittest discover
-        coverage xml -o coverage.xml
-        coverage html -d htmlcov
-    - name: List files after generating coverage reports
-      run: |
-        ls -la
+        coverage run -m unittest discover tests
+        coverage xml  # 生成 XML 格式的覆盖率报告
+        coverage html  # 生成 HTML 格式的覆盖率报告
     - name: Upload coverage report as artifact
       uses: actions/upload-artifact@v4
       with:
         name: coverage-report-${{ github.run_id }}-${{ github.job }}
         path: |
-          htmlcov/
-          coverage.xml
+          htmlcov/  # 上传 HTML 报告
+          coverage.xml  # 上传 XML 报告
