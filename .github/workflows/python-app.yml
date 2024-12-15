@@ -25,6 +25,11 @@ jobs:
       - name: Run tests
         run: |
           python run_tests.py
-      - name: Generate coverage report
-        run: 
-          tox -e coverage
+      - name: Run coverage
+        run: |
+          pytest --cov=tests --cov-report=xml --cov-report=html tests/
+      - name: Upload coverage report as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report
+          path: htmlcov/
