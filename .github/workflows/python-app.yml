@@ -22,15 +22,19 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install coverage  # 确保coverage库被安装，尽管它可能已经在requirements.txt中
+    - name: Ensure htmlcov directory exists (optional)
+      run: |
+        mkdir -p htmlcov  # 这通常是多余的，因为coverage html会自动创建它
     - name: Run tests and generate coverage report
       run: |
         coverage run -m unittest discover tests
         coverage xml  # 生成 XML 格式的覆盖率报告
-        coverage html  # 生成 HTML 格式的覆盖率报告
+        coverage html -d htmlcov  # 明确指定生成HTML报告的目录（尽管默认就是htmlcov）
     - name: Upload coverage report as artifact
       uses: actions/upload-artifact@v4
       with:
         name: coverage-report-${{ github.run_id }}-${{ github.job }}
         path: |
-          htmlcov/  # 上传 HTML 报告
-          coverage.xml  # 上传 XML 报告
+          htmlcov/  # 上传 HTML 报告目录
+          coverage.xml  # 上传 XML 报告文件
