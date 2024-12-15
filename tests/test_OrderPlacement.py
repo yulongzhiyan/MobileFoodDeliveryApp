@@ -1,6 +1,8 @@
 import unittest
 from unittest import mock  # 导入 mock 模块，用于模拟支付失败的情况。
 
+from tests.integration_tests import User
+
 
 # 购物车商品类
 class CartItem:
@@ -573,5 +575,54 @@ class TestOrderPlacement(unittest.TestCase):
         order_history = self.user_profile.view_order_history()
         self.assertEqual(len(order_history), 1)
         self.assertEqual(order_history[0]['order_id'], 'ORD123456')
+#红绿测试
+class TestUserOrderHistory(unittest.TestCase):
+    def setUp(self):
+        # 每个测试用例前都初始化一个 User 实例
+        self.user = User()
+    def test_view_order_history_with_discounted_orders(self):
+        self.user.add_order("Order003", "Salad", 10.00, "Delivered", "2023-09-17")
+        self.user.add_order("Order004", "Soda", 2.00, "Delivered", "2023-09-18")
+        # 假设对订单进行折扣操作
+        self.user.orders[0]["price"] = 8.00
+        order_history = self.user.view_order_history()
+        self.assertEqual(len(order_history), 2)
+        self.assertEqual(order_history[0]["price"], 8.00)
+        self.assertEqual(order_history[1]["price"], 2.00)
+    def test_view_order_history_with_different_addresses(self):
+        self.user.add_order("Order008", "Cake", 20.00, "Delivered", "2023-09-22")
+        # 假设更新用户地址
+        self.user.delivery_address = "789 Oak St"
+        self.user.add_order("Order009", "Chocolate", 18.00, "Delivered", "2023-09-23")
+        order_history = self.user.view_order_history()
+        self.assertEqual(len(order_history), 2)
+        self.assertEqual(self.user.delivery_address, "789 Oak St")
+    def test_view_order_history_with_address_change_midway(self):
+        self.user.add_order("Order101", "Steak", 30.00, "Delivered", "2023-10-01")
+        # 假设更新用户地址
+        self.user.delivery_address = "456 Elm St"
+        self.user.add_order("Order102", "Sushi", 25.00, "Delivered", "2023-10-02")
+        order_history = self.user.view_order_history()
+        self.assertEqual(len(order_history), 2)
+        self.assertEqual(order_history[0]['delivery_address'], "123 Main St")
+        self.assertEqual(order_history[1]['delivery_address'], "456 Elm St")
+    def test_view_order_history_with_null_address(self):
+        self.user.add_order("Order106", "Bread", 5.00, "Delivered", "2023-10-06")
+        # 假设更新用户地址为 None
+        self.user.delivery_address = None
+        self.user.add_order("Order107", "Butter", 3.00, "Delivered", "2023-10-07")
+        order_history = self.user.view_order_history()
+        self.assertEqual(len(order_history), 2)
+        self.assertIsNone(order_history[1]['delivery_address'])
+    def test_clear_order_history(self):
+        self.user.add_order("Order005", "Ice Cream", 5.00, "Pending", "2023-09-19")
+        self.user.clear_order_history()  # 假设添加了清空订单历史的方法
+        order_history = self.user.view_order_history()
+        self.assertEqual(len(order_history), 0)
+
+# 如果直接运行脚本，可以执行测试
+if __name__ == "__main__":
+    unittest.main()
+
 if __name__ == "__main__":
     unittest.main()

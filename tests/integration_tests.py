@@ -220,6 +220,30 @@ class TestIntegration(unittest.TestCase):
         result = self.registration.register("user@example.com", "Password123", "Password123")
         self.assertFalse(result['success'])  # 注册失败，邮箱已存在
         self.assertEqual(result['error'], "Email already registered")
+#红绿测试
+class User:
+    def __init__(self):
+        self.orders = []
+        self.delivery_address = "123 Main St"  # 默认地址
+
+    def add_order(self, order_id, item_name, price, status, date):
+        # 添加订单时记录当前的地址状态
+        self.orders.append({
+            "order_id": order_id,
+            "item_name": item_name,
+            "price": price,
+            "status": status,
+            "date": date,
+            "delivery_address": self.delivery_address
+        })
+
+    def view_order_history(self):
+        # 返回所有订单记录
+        return self.orders
+
+    def clear_order_history(self):
+        # 清空订单历史
+        self.orders = []
 
 
 if __name__ == '__main__':
