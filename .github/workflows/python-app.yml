@@ -13,23 +13,24 @@ jobs:
       matrix:
         python-version: ['3.9']
     steps:
-      - uses: actions/checkout@v3  
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4  
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Run tests
-        run: |
-          python run_tests.py
-      - name: Run coverage
-        run: |
-          pytest --cov=tests --cov-report=xml --cov-report=html tests/
-      - name: Upload coverage report as artifact
-        uses: actions/upload-artifact@v4  
-        with:
-          name: coverage-report-${{ github.run_id }}-${{ github.job }}
-          path: htmlcov/
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Run tests and generate coverage report
+      run: |
+        coverage run -m unittest discover tests
+        coverage xml  # 生成 XML 格式的覆盖率报告
+        coverage html  # 生成 HTML 格式的覆盖率报告
+    - name: Upload coverage report as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report-${{ github.run_id }}-${{ github.job }}
+        path: |
+          htmlcov/  # 上传 HTML 报告
+          coverage.xml  # 上传 XML 报告
