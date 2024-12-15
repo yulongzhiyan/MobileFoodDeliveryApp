@@ -25,3 +25,6 @@ jobs:
       - name: Run tests
         run: |
           python run_tests.py
+      - name: Generate coverage report
+        run: 
+          tox -e coverage
